@@ -1,66 +1,101 @@
-# MQTT catFeeder
-catFeeder is an Arduino (ESP8266) MQTT controlled cat feeder which I use to feed my cats when I'm away or in the bed at 6.30 AM on a Sunday morning.
-	The project is forked upon https://github.com/jorgerance/catFeeder which usees a telegram bot.
+# 🐱 MQTT CatFeeder
 
-i also added a pushbutton for manual operation and  Home-assistant integration through a script and 2 mqtt sensor.
-![](https://i.imgur.com/I6HMVH6.png)
-![](https://i.imgur.com/JwnOMNt.jpg)
+![Platform](https://img.shields.io/badge/platform-ESP8266-blue)
+![Language](https://img.shields.io/badge/language-C%2B%2B-orange)
+![Integration](https://img.shields.io/badge/integration-Home%20Assistant-41bdf5)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-## About the ESP8266:
-Wikipedia:
+**CatFeeder** is an Arduino (ESP8266) MQTT-controlled cat feeder designed to feed your pets remotely or on a schedule.
+This project is a fork of [jorgerance/catFeeder](https://github.com/jorgerance/catFeeder), replacing the original Telegram bot with **MQTT** and **Home Assistant** integration.
 
-> The **ESP8266** is a low-cost Wi-Fi chip with full TCP/IP stack and MCU (microcontroller unit) capability produced by Shanghai-based Chinese manufacturer, Espressif Systems.
+**New Features in this fork:**
+*   **MQTT Support:** Fully controlled via MQTT topics.
+*   **Home Assistant:** Ready-to-use integration (sensors + scripts).
+*   **Manual Override:** Physical pushbutton for manual feeding.
+*   **Food Level Monitoring:** Uses an HC-SR04 ultrasonic sensor.
 
-[Click here to access the full article](https://en.wikipedia.org/wiki/ESP8266)
+---
 
-## Main features:
-- Controlled via **MQTT**.
-- Wifi connection.
-- Possibility to check how much food can be still delivered with an **HC-SR04 ultrasonic ranging sensor**.
-- ~~Multi access point (can manage more than one SSID / password).~~ Removed because i dont need it, could be easily reintegrated?
+<p align="left">
+  <img src="images/feeder_render.png" width="45%" alt="Cat Feeder" />
+</p>
 
-## Materials Needed:
-- 1 x NodeMCU V3 dev board (esp8266): ~2.65 USD. / ~5€ 
-- 1 x NodeMCU Base Breadboard (optional): ~1.88 USD. / 3€
-- 1 x L298N Dual H bridge driver: ~3.33 USD. / 7€
-- 1 x HC-SR04 ultrasonic ranging sensor: ~1.50 USD. / 2€
-- 1 x 12V 2A Power Supply*: ~6.58 USD. / i had one around :)
-- 1 x Cereal dispenser: ~10.00 USD. / ~ 12€ for a dual
-- 2 x MDF pieces, i used 45x15 and 15x15: ~6.00 USD. / 2-4 € worth of MDF
-- 2 x Little metal L bracket
-- 1 x Plastic enclosure for PSU: ~4.00 USD. / 1€ for a standard elecrtical box
-- 1 x 4 pieces lot 5x8mm couplings: ~5.50 USD. / 8.99 €
-- 1 x NEMA 17 Motor 1.7A: ~9.00 USD.  // 12€
-- 1 x Misc. cables: ~2.00 USD. // had some laying around
-- 1 x Can of acrylic spray paint 5€
+---
+
+## 🧠 About the ESP8266
+
+> The **ESP8266** is a low-cost Wi-Fi chip with full TCP/IP stack and MCU (microcontroller unit) capability produced by Espressif Systems.
+> — [Wikipedia](https://en.wikipedia.org/wiki/ESP8266)
+
+## ✨ Main Features
+
+*   📡 **Remote Control:** Trigger feeding via MQTT.
+*   📶 **WiFi Connectivity:** Connects directly to your home network.
+*   🥣 **Food Level Monitoring:** HC-SR04 ultrasonic sensor calculates remaining food %.
+*   🔘 **Manual Button:** Physical button for ad-hoc feeding.
+
+## 🛠 Materials Needed
+
+| Item | Approx. Cost (USD) | Approx. Cost (EUR) | Notes |
+| :--- | :--- | :--- | :--- |
+| NodeMCU V3 (ESP8266) | ~$2.65 | ~€5 | |
+| NodeMCU Base Breadboard | ~$1.88 | ~€3 | Optional |
+| L298N Dual H Bridge | ~$3.33 | ~€7 | Driver |
+| HC-SR04 Ultrasonic Sensor| ~$1.50 | ~€2 | |
+| 12V 2A Power Supply | ~$6.58 | - | Recycled |
+| Cereal Dispenser | ~$10.00 | ~€12 | For dual |
+| MDF Pieces | ~$6.00 | ~€2-4 | 45x15 & 15x15 |
+| Metal L Brackets | - | - | x2 |
+| Plastic Enclosure | ~$4.00 | ~€1 | Standard electrical box |
+| 5x8mm Couplings | ~$5.50 | ~€9 | 4 pieces lot |
+| NEMA 17 Motor (1.7A) | ~$9.00 | ~€12 | |
+| Misc. Cables | ~$2.00 | - | |
+| Acrylic Spray Paint | - | ~€5 | |
+
+**Total Cost:** Depends on what you have lying around! 😊
+
+## 🔌 Schematics
+
+<p align="left">
+  <img src="images/schematics.png" width="80%" alt="Wiring Schematic" />
+</p>
+
+No need for a perfboard; direct wiring works fine. For the ultrasonic sensor, hot glue works well to mount it on top of the dispenser.
 
 
-**Total cost: up to what you have available :)
+## 💻 Configuration (`catFeeder.ino`)
 
-## Schematics:
+Before uploading, open `catFeeder.ino` and search for `REPLACEME`. You will need to update:
+*   WiFi SSID & Password
+*   MQTT Broker IP & Credentials
+*   OTA Password
 
-![](https://i.imgur.com/3LSziQ2.png)
+### 📚 Necessary Libraries
 
-There's actually no need of perfboard / protoboard. However, in order to mount the HC-SR04 on the top of the cereal dispenser you may use a hot glue gun.
+Ensure these are installed in your Arduino IDE:
 
-![](https://i.imgur.com/0e6oNYw.jpg)
+```cpp
+#include <Stepper.h>
+#include <ESP8266WiFi.h>
+#include <ArduinoOTA.h>
+#include <PubSubClient.h>
+// Use this specific fork for getFormattedDate() support:
+// https://github.com/taranais/NTPClient/releases
+#include <NTPClient.h>
+```
 
-## Parameters to be updated on the .ino file:
+## 🏠 Home Assistant & MQTT Control
 
-    Just search for REPLACEME inside the ino before uploading.
-	
-Necessary libraries:
+  <img src="images/hass.png" width="45%" alt="Hass" />
 
-	#include <Stepper.h>
-	#include <ESP8266WiFi.h>
-	#include <ArduinoOTA.h>
-	#include <PubSubClient.h>
-	#include <NTPClient.h> (using a fork for leveraging getFormattedDate() find it here: https://github.com/taranais/NTPClient/releases)
+You can use the script provided in the `HASS - Homeassistant` folder.
 
+**MQTT Command Topic:**
+To feed the cats, publish `feed` to:
+```
+home/catfeeder/feed
+```
 
-## How to control the cat feeder via mqtt/Home Assistant:
-just publish "feed" to the MQTT command channel, which if you dont change anything is
-    home/catfeeder/feed
-
-You can use the script i provided under the HASS folder.
-
+**MQTT Status Topics:**
+*   Last Fed: `home/catfeeder/lastfed`
+*   Remaining Food: `home/catfeeder/remaining`
